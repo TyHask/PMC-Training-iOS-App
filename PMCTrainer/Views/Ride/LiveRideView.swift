@@ -151,14 +151,21 @@ struct LiveRideView: View {
                 .cornerRadius(16)
                 .padding(.horizontal, 12)
 
-                Button(action: { isMapFollowing.toggle() }) {
+                Button(action: toggleMapFollowing) {
                     Image(systemName: isMapFollowing ? "location.fill" : "location")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(isMapFollowing ? PMCTheme.tealAccent : PMCTheme.lightTeal)
-                        .padding(8)
-                        .background(PMCTheme.deepNavy.opacity(0.85))
+                        .frame(width: 44, height: 44)
+                        .background(PMCTheme.deepNavy.opacity(0.92))
                         .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(PMCTheme.tealAccent.opacity(isMapFollowing ? 0.75 : 0.25), lineWidth: 1)
+                        )
                 }
+                .buttonStyle(.plain)
+                .contentShape(Circle())
+                .accessibilityLabel(isMapFollowing ? "Disable map follow" : "Center map on current location")
                 .padding(.top, 8)
                 .padding(.trailing, 20)
             }
@@ -225,6 +232,16 @@ struct LiveRideView: View {
                 .tracking(0.8)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private func toggleMapFollowing() {
+        let shouldFollow = !isMapFollowing
+        isMapFollowing = shouldFollow
+
+        guard shouldFollow, let coordinate = locationManager.currentLocation?.coordinate else { return }
+        withAnimation(.easeInOut(duration: 0.35)) {
+            mapRegion.center = coordinate
+        }
     }
 
     // MARK: - Bottom Controls

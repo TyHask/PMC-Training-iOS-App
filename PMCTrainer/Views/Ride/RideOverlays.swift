@@ -300,24 +300,16 @@ struct IntervalStopwatchOverlay: View {
     @State private var lapStartTime: Date?
 
     var body: some View {
-        VStack {
-            Spacer()
+        VStack(spacing: 0) {
+            Spacer(minLength: 0)
 
-            VStack(spacing: 0) {
-                // Drag handle
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(PMCTheme.lightTeal.opacity(0.4))
-                    .frame(width: 40, height: 4)
-                    .padding(.top, 10)
-                    .padding(.bottom, 14)
-
-                // Header
+            VStack(spacing: 10) {
                 HStack {
                     HStack(spacing: 8) {
                         Image(systemName: "stopwatch.fill")
                             .font(.system(size: 14))
                             .foregroundColor(PMCTheme.patriotRed)
-                        Text("Interval Stopwatch")
+                        Text("Intervals")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(PMCTheme.scriptWhite)
                     }
@@ -327,88 +319,63 @@ struct IntervalStopwatchOverlay: View {
                             .font(.system(size: 20))
                             .foregroundColor(PMCTheme.lightTeal)
                     }
-                }
-                .padding(.horizontal, 20)
-
-                TealDivider()
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 20)
-
-                // Timer display
-                Text(formatElapsed(elapsed))
-                    .font(.system(size: 56, weight: .black, design: .monospaced))
-                    .foregroundColor(isRunning ? PMCTheme.tealAccent : PMCTheme.scriptWhite)
-                    .shadow(color: isRunning ? PMCTheme.tealAccent.opacity(0.4) : .clear, radius: 8)
-                    .padding(.vertical, 8)
-
-                // Current lap time
-                if isRunning, let lapStart = lapStartTime {
-                    let lapElapsed = Date().timeIntervalSince(lapStart)
-                    Text("Lap \(laps.count + 1): \(formatElapsed(lapElapsed))")
-                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                        .foregroundColor(PMCTheme.lightTeal)
-                        .padding(.bottom, 4)
+                    .buttonStyle(.plain)
                 }
 
-                // Controls
-                HStack(spacing: 20) {
-                    // Reset
-                    Button(action: resetTimer) {
-                        Text("Reset")
-                            .font(.system(size: 15, weight: .semibold))
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(formatElapsed(elapsed))
+                            .font(.system(size: 36, weight: .black, design: .monospaced))
+                            .foregroundColor(isRunning ? PMCTheme.tealAccent : PMCTheme.scriptWhite)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+
+                        Text(currentLapLabel)
+                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
                             .foregroundColor(PMCTheme.lightTeal)
-                            .frame(width: 80, height: 44)
-                            .background(PMCTheme.midNavy)
-                            .cornerRadius(22)
-                            .overlay(RoundedRectangle(cornerRadius: 22).stroke(PMCTheme.tealAccent.opacity(0.3), lineWidth: 1))
                     }
 
-                    // Start / Stop
-                    Button(action: toggleTimer) {
-                        Text(isRunning ? "Stop" : "Start")
-                            .font(.system(size: 17, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 100, height: 52)
-                            .background(isRunning ? PMCTheme.patriotRed : Color.green)
-                            .cornerRadius(26)
-                    }
+                    Spacer(minLength: 8)
 
-                    // Lap
-                    Button(action: recordLap) {
-                        Text("Lap")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(isRunning ? PMCTheme.tealAccent : PMCTheme.lightTeal.opacity(0.5))
-                            .frame(width: 80, height: 44)
-                            .background(PMCTheme.midNavy)
-                            .cornerRadius(22)
-                            .overlay(RoundedRectangle(cornerRadius: 22).stroke(
-                                isRunning ? PMCTheme.tealAccent.opacity(0.5) : PMCTheme.tealAccent.opacity(0.1),
-                                lineWidth: 1
-                            ))
+                    HStack(spacing: 10) {
+                        compactControlButton(
+                            icon: "arrow.counterclockwise",
+                            label: "Reset",
+                            color: PMCTheme.lightTeal,
+                            action: resetTimer
+                        )
+
+                        compactControlButton(
+                            icon: isRunning ? "stop.fill" : "play.fill",
+                            label: isRunning ? "Stop" : "Start",
+                            color: isRunning ? PMCTheme.patriotRed : Color.green,
+                            action: toggleTimer
+                        )
+
+                        compactControlButton(
+                            icon: "flag.fill",
+                            label: "Lap",
+                            color: isRunning ? PMCTheme.tealAccent : PMCTheme.lightTeal.opacity(0.45),
+                            action: recordLap
+                        )
+                        .disabled(!isRunning)
                     }
-                    .disabled(!isRunning)
                 }
-                .padding(.vertical, 12)
 
-                // Laps list
                 if !laps.isEmpty {
                     TealDivider()
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 8)
+                        .padding(.top, 2)
 
-                    ScrollView {
-                        VStack(spacing: 6) {
-                            ForEach(laps.reversed()) { lap in
-                                lapRow(lap: lap)
-                            }
+                    VStack(spacing: 5) {
+                        ForEach(Array(laps.suffix(3).reversed())) { lap in
+                            lapRow(lap: lap)
                         }
-                        .padding(.horizontal, 20)
                     }
-                    .frame(maxHeight: 160)
                 }
-
-                Spacer(minLength: 24)
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 14)
             .background(
                 RoundedRectangle(cornerRadius: 24)
                     .fill(
@@ -423,26 +390,52 @@ struct IntervalStopwatchOverlay: View {
                             .stroke(PMCTheme.patriotRed.opacity(0.3), lineWidth: 1)
                     )
             )
+            .padding(.horizontal, 10)
+            .padding(.bottom, 8)
         }
         .ignoresSafeArea(edges: .bottom)
+    }
+
+    private var currentLapLabel: String {
+        if isRunning, let lapStart = lapStartTime {
+            return "Lap \(laps.count + 1)  \(formatElapsed(Date().timeIntervalSince(lapStart)))"
+        }
+        if let last = laps.last {
+            return "Last lap  \(last.formattedDuration)"
+        }
+        return "Ready for lap 1"
+    }
+
+    private func compactControlButton(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(color)
+                .frame(width: 42, height: 42)
+                .background(PMCTheme.deepNavy.opacity(0.75))
+                .clipShape(Circle())
+                .overlay(Circle().stroke(color.opacity(0.35), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     private func lapRow(lap: IntervalLap) -> some View {
         HStack {
             Text("Lap \(lap.lapNumber)")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(PMCTheme.lightTeal)
             Spacer()
             Text(lap.formattedDuration)
-                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .font(.system(size: 12, weight: .bold, design: .monospaced))
                 .foregroundColor(PMCTheme.tealAccent)
             Text(String(format: "%.2f mi", lap.distance))
-                .font(.system(size: 12))
+                .font(.system(size: 11))
                 .foregroundColor(PMCTheme.lightTeal)
                 .frame(width: 60, alignment: .trailing)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
+        .padding(.horizontal, 10)
         .background(PMCTheme.deepNavy.opacity(0.5))
         .cornerRadius(8)
     }
@@ -489,7 +482,7 @@ struct StartRideSheet: View {
     let onStart: () -> Void
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PMCTheme.backgroundGradient.ignoresSafeArea()
                 StarScatterView().ignoresSafeArea().allowsHitTesting(false)

@@ -3,9 +3,10 @@ import SwiftUI
 // Renamed to PMCProgressView to avoid conflict with SwiftUI's built-in ProgressView
 struct PMCProgressView: View {
     @EnvironmentObject var workoutStore: WorkoutStore
+    @State private var selectedRide: CompletedRide?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PMCTheme.backgroundGradient.ignoresSafeArea()
                 StarScatterView().ignoresSafeArea().allowsHitTesting(false)
@@ -31,6 +32,10 @@ struct PMCProgressView: View {
                                 .padding(.top, 4)
                             ForEach(workoutStore.completedRides) { ride in
                                 RideHistoryRow(ride: ride)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        selectedRide = ride
+                                    }
                             }
                         }
 
@@ -42,6 +47,11 @@ struct PMCProgressView: View {
             }
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.large)
+            .sheet(item: $selectedRide) { ride in
+                NavigationStack {
+                    RideReplayView(ride: ride)
+                }
+            }
         }
     }
 
@@ -416,6 +426,10 @@ struct RideHistoryRow: View {
                         .font(.caption)
                         .foregroundColor(PMCTheme.lightTeal)
                 }
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(PMCTheme.lightTeal.opacity(0.7))
             }
             .padding(12)
         }

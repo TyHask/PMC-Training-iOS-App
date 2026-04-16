@@ -11,7 +11,7 @@ struct TodayView: View {
     @State private var showingStartRide     = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PMCTheme.backgroundGradient.ignoresSafeArea()
                 StarScatterView().ignoresSafeArea().allowsHitTesting(false)
@@ -35,9 +35,14 @@ struct TodayView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "bicycle")
-                        .foregroundColor(PMCTheme.tealAccent)
-                        .font(.title2)
+                    Button {
+                        showingStartRide = true
+                    } label: {
+                        Image(systemName: "bicycle")
+                            .foregroundColor(PMCTheme.tealAccent)
+                            .font(.title2)
+                    }
+                    .accessibilityLabel("Start ride")
                 }
             }
         }

@@ -8,7 +8,7 @@ struct SettingsView: View {
     @State private var showingResetConfirm = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PMCTheme.deepNavy
                     .ignoresSafeArea()

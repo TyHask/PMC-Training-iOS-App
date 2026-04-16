@@ -381,7 +381,7 @@ struct RideSummaryView: View {
         if let w = workout {
             workoutStore.markWorkout(id: w.id, status: .completed)
         }
-        workoutStore.saveCompletedRide(ride)
+        workoutStore.saveCompletedRide(ride.withNotes(notes))
     }
 }
 

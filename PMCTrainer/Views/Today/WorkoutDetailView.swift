@@ -10,7 +10,7 @@ struct WorkoutDetailView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PMCTheme.deepNavy
                     .ignoresSafeArea()

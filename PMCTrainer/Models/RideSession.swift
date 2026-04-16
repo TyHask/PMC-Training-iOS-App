@@ -69,6 +69,29 @@ struct CompletedRide: Identifiable, Codable {
         if h > 0 { return String(format: "%d:%02d:%02d", h, m, s) }
         return String(format: "%d:%02d", m, s)
     }
+
+    func withNotes(_ updatedNotes: String) -> CompletedRide {
+        CompletedRide(
+            id: id,
+            workoutID: workoutID,
+            workoutTitle: workoutTitle,
+            startTime: startTime,
+            endTime: endTime,
+            totalDistance: totalDistance,
+            movingTime: movingTime,
+            elapsedTime: elapsedTime,
+            avgSpeed: avgSpeed,
+            maxSpeed: maxSpeed,
+            totalElevationGain: totalElevationGain,
+            avgHeartRate: avgHeartRate,
+            maxHeartRate: maxHeartRate,
+            dominantZoneShort: dominantZoneShort,
+            routeCoordinates: routeCoordinates,
+            elevationPoints: elevationPoints,
+            laps: laps,
+            notes: updatedNotes
+        )
+    }
 }
 
 // MARK: - CLLocationCoordinate2D Codable

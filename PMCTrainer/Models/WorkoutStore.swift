@@ -96,7 +96,12 @@ class WorkoutStore: ObservableObject {
     // MARK: - Ride History
 
     func saveCompletedRide(_ ride: CompletedRide) {
-        completedRides.insert(ride, at: 0) // newest first
+        if let existingIndex = completedRides.firstIndex(where: { $0.id == ride.id }) {
+            completedRides[existingIndex] = ride
+        } else {
+            completedRides.insert(ride, at: 0)
+        }
+        completedRides.sort { $0.startTime > $1.startTime }
         persistRides()
     }
 

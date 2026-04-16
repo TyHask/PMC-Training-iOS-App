@@ -7,10 +7,9 @@ struct PlanView: View {
     var onStartRide: ((DailyWorkout?) -> Void)?
 
     @State private var selectedWeek: TrainingWeek?
-    @State private var showingWeekDetail = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PMCTheme.backgroundGradient.ignoresSafeArea()
                 StarScatterView().ignoresSafeArea().allowsHitTesting(false)
@@ -25,7 +24,6 @@ struct PlanView: View {
                             WeekRowCard(week: week)
                                 .onTapGesture {
                                     selectedWeek = week
-                                    showingWeekDetail = true
                                 }
                         }
                         Spacer(minLength: 40)
@@ -36,10 +34,8 @@ struct PlanView: View {
             }
             .navigationTitle("Training Plan")
             .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showingWeekDetail) {
-                if let week = selectedWeek {
-                    WeekDetailView(week: week, onStartRide: onStartRide)
-                }
+            .sheet(item: $selectedWeek) { week in
+                WeekDetailView(week: week, onStartRide: onStartRide)
             }
         }
     }
@@ -243,15 +239,14 @@ struct WeekDetailView: View {
     var onStartRide: ((DailyWorkout?) -> Void)?
 
     @State private var selectedWorkout: DailyWorkout?
-    @State private var showingWorkoutDetail = false
-    @State private var showingStartRide = false
+    @State private var rideWorkout: DailyWorkout?
 
     var currentWeek: TrainingWeek {
         workoutStore.week(for: week.weekNumber) ?? week
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PMCTheme.backgroundGradient.ignoresSafeArea()
                 StarScatterView().ignoresSafeArea().allowsHitTesting(false)
@@ -261,13 +256,10 @@ struct WeekDetailView: View {
                         weekSummaryCard
                         ForEach(currentWeek.workouts) { workout in
                             DayWorkoutRow(workout: workout, onStartRide: { w in
+                                rideWorkout = w
+                            }, onSelect: { w in
                                 selectedWorkout = w
-                                showingStartRide = true
                             })
-                            .onTapGesture {
-                                selectedWorkout = workout
-                                showingWorkoutDetail = true
-                            }
                         }
                         Spacer(minLength: 40)
                     }
@@ -283,14 +275,12 @@ struct WeekDetailView: View {
                         .foregroundColor(PMCTheme.tealAccent)
                 }
             }
-            .sheet(isPresented: $showingWorkoutDetail) {
-                if let workout = selectedWorkout {
-                    WorkoutDetailView(workout: workout)
-                }
+            .sheet(item: $selectedWorkout) { workout in
+                WorkoutDetailView(workout: workout)
             }
-            .sheet(isPresented: $showingStartRide) {
-                StartRideSheet(workout: selectedWorkout) {
-                    onStartRide?(selectedWorkout)
+            .sheet(item: $rideWorkout) { workout in
+                StartRideSheet(workout: workout) {
+                    onStartRide?(workout)
                     dismiss()
                 }
                 .environmentObject(locationManager)
@@ -355,6 +345,7 @@ struct DayWorkoutRow: View {
     @EnvironmentObject var workoutStore: WorkoutStore
     let workout: DailyWorkout
     var onStartRide: ((DailyWorkout) -> Void)?
+    var onSelect: ((DailyWorkout) -> Void)?
 
     var currentWorkout: DailyWorkout {
         workoutStore.workout(for: workout.id) ?? workout
@@ -418,6 +409,10 @@ struct DayWorkoutRow: View {
                         .font(.caption)
                 }
                 .padding(14)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onSelect?(currentWorkout)
+                }
 
                 // Start Ride button for today's cycling workouts
                 if currentWorkout.isToday && currentWorkout.workoutType != .rest {
