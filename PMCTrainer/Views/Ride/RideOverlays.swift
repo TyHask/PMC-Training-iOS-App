@@ -186,20 +186,20 @@ struct SpotifyControlsOverlay: View {
         let center = MPRemoteCommandCenter.shared()
         if mediaInfo.isPlaying {
             _ = center.pauseCommand.isEnabled
-            UIApplication.shared.sendRemoteControlEvent(.pause)
+            UIApplication.shared.sendRemoteControlEvent(.remoteControlPause)
         } else {
-            UIApplication.shared.sendRemoteControlEvent(.play)
+            UIApplication.shared.sendRemoteControlEvent(.remoteControlPlay)
         }
         mediaInfo.isPlaying.toggle()
     }
 
     private func skipNext() {
-        UIApplication.shared.sendRemoteControlEvent(.nextTrack)
+        UIApplication.shared.sendRemoteControlEvent(.remoteControlNextTrack)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { mediaInfo.refresh() }
     }
 
     private func skipPrevious() {
-        UIApplication.shared.sendRemoteControlEvent(.previousTrack)
+        UIApplication.shared.sendRemoteControlEvent(.remoteControlPreviousTrack)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { mediaInfo.refresh() }
     }
 

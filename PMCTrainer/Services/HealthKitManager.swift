@@ -181,6 +181,7 @@ class HealthKitManager: ObservableObject {
         case .z3:   return "Zone 3"
         case .z4:   return "Zone 4"
         case .z5:   return "Zone 5"
+        case .mixed: return "Mixed Zones"
         }
     }
 
@@ -192,6 +193,7 @@ class HealthKitManager: ObservableObject {
         case .z3:   return "Z3"
         case .z4:   return "Z4"
         case .z5:   return "Z5"
+        case .mixed: return "Mix"
         }
     }
 
@@ -203,6 +205,7 @@ class HealthKitManager: ObservableObject {
         case .z3:   return Color(red: 1.0, green: 0.78, blue: 0.2)   // gold
         case .z4:   return Color(red: 1.0, green: 0.45, blue: 0.1)   // orange
         case .z5:   return PMCTheme.patriotRed
+        case .mixed: return TrainingZone.mixed.color
         }
     }
 
@@ -214,6 +217,7 @@ class HealthKitManager: ObservableObject {
         case .z3:   return "Tempo"
         case .z4:   return "Threshold"
         case .z5:   return "Max Effort"
+        case .mixed: return "Variable"
         }
     }
 

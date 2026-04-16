@@ -126,7 +126,7 @@ struct LiveRideView: View {
                     .frame(maxWidth: .infinity)
 
                 // RIGHT: Elevation Gain
-                ElevationGainPanel(gain: locationManager.elevationGain)
+                ElevationGainPanel(gain: locationManager.totalElevationGain)
                     .frame(maxWidth: .infinity)
             }
             .padding(.top, 44)
@@ -190,7 +190,7 @@ struct LiveRideView: View {
             )
             Divider().frame(height: 36).background(PMCTheme.tealAccent.opacity(0.3))
             statCell(
-                value: String(format: "%.0f", locationManager.elevationGain),
+                value: String(format: "%.0f", locationManager.totalElevationGain),
                 unit: "ft",
                 label: "Elev Gain"
             )
@@ -306,13 +306,13 @@ struct LiveRideView: View {
         let lapDist     = locationManager.totalDistance - currentLapStartDistance
         let lapDuration = now.timeIntervalSince(currentLapStart ?? now)
         let lap = IntervalLap(
-            number:    laps.count + 1,
+            id:        UUID(),
+            lapNumber: laps.count + 1,
             startTime: currentLapStart ?? now,
             endTime:   now,
-            duration:  lapDuration,
             distance:  lapDist,
             avgSpeed:  lapDuration > 0 ? lapDist / (lapDuration / 3600) : 0,
-            avgHR:     healthKit.avgHR
+            avgHeartRate: healthKit.avgHR
         )
         laps.append(lap)
         currentLapStart         = now
