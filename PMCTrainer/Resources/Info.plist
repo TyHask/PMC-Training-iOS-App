@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- HealthKit — live heart rate from wearables via Apple Health -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>PMC Trainer reads your live heart rate from Apple Health to display your current training zone during rides. No health data is stored or shared outside the app.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>PMC Trainer may write completed workout summaries to Apple Health so your ride data appears in the Health app.</string>
+
+	<!-- Location — GPS ride tracking -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PMC Trainer uses your location to track your ride route, speed, distance, and elevation in real time.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>PMC Trainer uses your location in the background to continue tracking your ride when the screen is locked.</string>
+
+	<!-- Notifications -->
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>PMC Trainer sends morning reminders for your daily training workouts to help you stay on track for the Pan-Mass Challenge.</string>
+
+	<!-- Motion (future cadence support) -->
+	<key>NSMotionUsageDescription</key>
+	<string>PMC Trainer may use motion data to detect cadence during rides.</string>
+
+	<!-- Background modes: location for GPS, fetch for HealthKit background delivery -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+
+	<!-- HealthKit capability declaration (also set in Xcode Signing & Capabilities) -->
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<key>com.apple.developer.healthkit.access</key>
+	<array>
+		<string>health-records</string>
+	</array>
+</dict>
+</plist>
