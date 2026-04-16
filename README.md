@@ -2,7 +2,7 @@
 
 **Pan-Mass Challenge 2026 Training App — America 250th Anniversary Edition**
 
-A native iOS SwiftUI app built for serious PMC riders. 15-week structured training plan, GPS ride tracking, WHOOP integration, Strava logging, and a live ride computer — all themed to match the 2026 PMC jersey's deep patriotic blue-to-teal gradient, bold red collar, and scattered stars.
+A native iOS SwiftUI app built for serious PMC riders. 15-week structured training plan, GPS ride tracking, live heart rate zones via Apple Health, and a full-screen ride computer — all themed to match the 2026 PMC jersey's deep patriotic blue-to-teal gradient, bold red collar, and scattered stars.
 
 ---
 
@@ -36,7 +36,7 @@ Scattered star motifs, the deep navy-to-teal background gradient, and bold red c
 ### Today Tab
 - Race countdown to PMC 2026 (August 1–2)
 - Today's workout card with zone badge and one-tap start
-- WHOOP recovery ring and strain display
+- Live heart rate summary card (via Apple Health)
 - Weekly mini-progress grid
 - **Start Ride** button launches GPS tracking for today's workout
 
@@ -51,13 +51,13 @@ The full-screen ride computer activates when you tap **Start Ride**:
 
 **Top 1/3 — Hero Metrics (always visible)**
 - **Center**: Current speed in giant MPH display with elapsed timer
-- **Left**: Live WHOOP heart rate zone ring (Z1–Z5) with bpm
-- **Right**: Live WHOOP strain arc (0–21) with label
+- **Left**: Live heart rate zone ring (Z1–Z5) with bpm — reads from Apple Health in real time via Bluetooth (no internet needed)
+- **Right**: Live elevation gain arc with total feet climbed
 
 **Middle — Map + Live Stats**
 - Live GPS route map with teal polyline showing path ridden
 - Follow/lock toggle button
-- Live stats row: Distance · Avg Speed · Avg HR · Strain
+- Live stats row: Distance · Avg Speed · Avg HR · Elev Gain
 
 **Elevation Tracker**
 - Live scrolling elevation profile graph
@@ -65,20 +65,19 @@ The full-screen ride computer activates when you tap **Start Ride**:
 - Min/max elevation labels, current elevation, total gain
 
 **Controls**
-- **Music** — System media controls overlay (album art, skip, play/pause, volume) — works with Spotify, Apple Music, etc.
+- **Music** — System media controls overlay (album art, skip, play/pause, volume) — works with Spotify, Apple Music, or any app playing in the background
 - **Pause/Resume** — GPS pauses and resumes cleanly
 - **Intervals** — Stopwatch overlay with lap recording for interval workouts
 - **Finish** — Confirmation alert → Ride Summary
 
 ### Ride Summary
 After finishing, you get a full summary screen:
-- Total distance, moving time, avg speed, max speed, elevation gain, avg HR
+- Total distance, moving time, avg speed, max speed, elevation gain
+- Heart rate summary: avg bpm, max bpm, dominant training zone
 - Route map snapshot
 - Elevation profile
-- WHOOP strain before/after/increase
 - Interval laps table (if recorded)
 - Notes field
-- One-tap Strava log button (pre-fills name, type, zone, notes)
 - Ride saved to history automatically
 
 ### Progress Tab
@@ -89,8 +88,7 @@ After finishing, you get a full summary screen:
 
 ### Settings Tab
 - **Zone Calculator** — Enter max HR → instant Z1–Z5 bpm ranges
-- **Strava** — OAuth2 connect/disconnect
-- **WHOOP** — OAuth2 connect/disconnect
+- **Apple Health** — Authorize live heart rate access
 - **Notifications** — Enable/disable 7:00 AM workout reminders
 
 ---
@@ -100,7 +98,7 @@ After finishing, you get a full summary screen:
 ```
 PMCTrainer/
 ├── App/
-│   └── PMCTrainerApp.swift          # Entry point, OAuth URL handling, RootNavigationView
+│   └── PMCTrainerApp.swift          # Entry point, RootNavigationView
 ├── Models/
 │   ├── TrainingModels.swift         # DailyWorkout, TrainingWeek, TrainingZone, etc.
 │   ├── TrainingPlanData.swift       # All 15 weeks + race week workout data
@@ -108,8 +106,7 @@ PMCTrainer/
 │   └── WorkoutStore.swift           # @StateObject persistence layer
 ├── Services/
 │   ├── LocationManager.swift        # CLLocationManager, GPS tracking, ride state machine
-│   ├── StravaService.swift          # OAuth2, activity logging, StravaAuthView, StravaLogView
-│   ├── WhoopService.swift           # OAuth2, recovery/strain fetch, WhoopAuthView
+│   ├── HealthKitManager.swift       # Live HR streaming from Apple Health (HKAnchoredObjectQuery)
 │   └── NotificationManager.swift   # Local push notifications (7am reminders)
 ├── Utils/
 │   └── PMCTheme.swift               # Design tokens, gradients, StarScatterView, TealDivider
@@ -124,7 +121,7 @@ PMCTrainer/
 │   ├── Ride/
 │   │   ├── LiveRideView.swift       # Full-screen GPS ride computer
 │   │   ├── ElevationTrackerView.swift # Live elevation graph
-│   │   ├── RideOverlays.swift       # Spotify controls, interval stopwatch, StartRideSheet
+│   │   ├── RideOverlays.swift       # Music controls, interval stopwatch, StartRideSheet
 │   │   └── RideSummaryView.swift    # Post-ride summary + save
 │   ├── Progress/
 │   │   └── ProgressView.swift       # Weekly progress + ride history
@@ -133,7 +130,7 @@ PMCTrainer/
 │       └── ZoneCalculatorView.swift # HR zone calculator
 └── Resources/
     ├── Colors.xcassets/             # America 250 color palette
-    └── Info.plist                   # URL schemes, permissions
+    └── Info.plist                   # Permissions
 ```
 
 ---
@@ -143,40 +140,33 @@ PMCTrainer/
 ### Requirements
 - Xcode 15.0+
 - iOS 17.0+ deployment target
-- Physical iPhone for GPS testing (simulator has no GPS)
+- Physical iPhone for GPS and heart rate testing (simulator has no GPS or live HR)
 
 ### Quick Start
 
 1. **Open** `PMCTrainer.xcodeproj` in Xcode
 2. Set your **Team** in Signing & Capabilities
-3. Add your API credentials (see below)
-4. Build & run on device
+3. Enable the **HealthKit** capability (Signing & Capabilities → + Capability → HealthKit)
+4. Build & run on your iPhone
 
-### Strava API Setup
-1. Go to [strava.com/settings/api](https://www.strava.com/settings/api)
-2. Create an app, set **Authorization Callback Domain** to `pmctrainer`
-3. In `StravaService.swift`, replace:
-   ```swift
-   private let clientID = "YOUR_STRAVA_CLIENT_ID"
-   private let clientSecret = "YOUR_STRAVA_CLIENT_SECRET"
-   ```
+### Live Heart Rate Setup
+The app reads live heart rate from **Apple Health** — no API key or account needed.
 
-### WHOOP API Setup
-1. Go to [developer.whoop.com](https://developer.whoop.com)
-2. Create an app, set redirect URI to `pmctrainer://whoop-callback`
-3. In `WhoopService.swift`, replace:
-   ```swift
-   private let clientID = "YOUR_WHOOP_CLIENT_ID"
-   private let clientSecret = "YOUR_WHOOP_CLIENT_SECRET"
-   ```
+To enable live HR from your wearable:
+- **WHOOP**: In the WHOOP app → Settings → Health → toggle **Heart Rate** on
+- **Apple Watch**: Automatically writes HR to Health during workouts
+- **Garmin / other**: Enable Apple Health sync in your device's companion app
+
+Heart rate is streamed via Bluetooth from your wearable to your iPhone and into Apple Health. The app reads it every ~5 seconds using `HKAnchoredObjectQuery` — **no internet connection required during rides.**
 
 ### Music Controls
-The music overlay uses iOS `MediaPlayer` framework — it controls whatever is playing system-wide (Spotify, Apple Music, etc.). No additional API key needed. Start music before your ride.
+The music overlay uses iOS `MediaPlayer` framework — it controls whatever is playing system-wide (Spotify, Apple Music, etc.). No additional setup needed. Start your music before tapping Start Ride.
 
 ### Required Permissions (already in Info.plist)
+- `NSHealthShareUsageDescription` — Live heart rate from Apple Health
+- `NSHealthUpdateUsageDescription` — Write workout summaries to Health
 - `NSLocationWhenInUseUsageDescription` — GPS tracking
 - `NSLocationAlwaysAndWhenInUseUsageDescription` — Background GPS
-- URL Schemes: `pmctrainer://strava-callback`, `pmctrainer://whoop-callback`
 
 ---
 
